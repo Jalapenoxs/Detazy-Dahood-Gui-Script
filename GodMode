@@ -1,0 +1,70 @@
+local Players = game:GetService("Players")
+
+local function showImage()
+    local playerGui = Players.LocalPlayer:WaitForChild("PlayerGui")
+    local screenGui = Instance.new("ScreenGui")
+    local imageLabel = Instance.new("ImageLabel")
+
+    imageLabel.Image = "rbxassetid://75037233242564"
+    imageLabel.Size = UDim2.new(0, 100, 0, 100)
+    imageLabel.Position = UDim2.new(0.5, -50, 0.5, -50)
+    imageLabel.BackgroundTransparency = 1
+    imageLabel.ImageTransparency = 1
+
+    imageLabel.Parent = screenGui
+    screenGui.Parent = playerGui
+
+    setCircular(imageLabel)
+
+    fadeInAndOut(imageLabel)
+end
+
+local function createInvisibleShield(character)
+    local forceField = Instance.new("ForceField")
+    forceField.Visible = false
+    forceField.Parent = character
+end
+
+local function enableGodModeForExecutingPlayer()
+    local localPlayer = Players.LocalPlayer
+
+    local function onCharacterAdded(character)
+        local humanoid = character:WaitForChild("Humanoid")
+        humanoid.MaxHealth = math.huge
+        humanoid.Health = math.huge
+
+        humanoid.HealthChanged:Connect(function()
+            if humanoid.Health < math.huge then
+                humanoid.Health = math.huge
+            end
+        end)
+
+        createInvisibleShield(character)
+    end
+
+    localPlayer.CharacterAdded:Connect(onCharacterAdded)
+
+    if localPlayer.Character then
+        onCharacterAdded(localPlayer.Character)
+    end
+
+    showImage()
+
+    localPlayer.CharacterRemoving:Connect(function()
+        wait(0.01)
+        enableGodModeForExecutingPlayer()
+    end)
+end
+
+enableGodModeForExecutingPlayer()
+
+local function onPlayerChatted(message)
+    if message == "!die" then
+        local character = Players.LocalPlayer.Character
+        if character then
+            character.Humanoid.Health = 0
+        end
+    end
+end
+
+Players.LocalPlayer.Chatted:Connect(onPlayerChatted)
